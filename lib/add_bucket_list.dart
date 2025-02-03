@@ -35,48 +35,91 @@ class _AddBucketListScreenState extends State<AddBucketListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var addForm = GlobalKey<FormState>();
     return Scaffold(
       appBar: AppBar(
         title: Text("Add Bucket List"),
       ),
-      body: Column(
-        children: [
-          TextField(
-            controller: nameText,
-            decoration: InputDecoration(label: Text("Name")),
-          ),
-          SizedBox(
-            height: 30,
-          ),
-          TextField(
-            controller: descriptionText,
-            decoration: InputDecoration(label: Text("Description")),
-          ),
-          SizedBox(
-            height: 30,
-          ),
-          TextField(
-            controller: attributeText,
-            decoration: InputDecoration(label: Text("Main Attribute")),
-          ),
-          SizedBox(
-            height: 30,
-          ),
-          TextField(
-            controller: imageURLText,
-            decoration: InputDecoration(label: Text("Image URL")),
-          ),
-          SizedBox(
-            height: 30,
-          ),
-          Row(
-            children: [
-              Expanded(
-                  child: ElevatedButton(
-                      onPressed: addData, child: Text("Add Data"))),
-            ],
-          ),
-        ],
+      body: Form(
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        key: addForm,
+        child: Column(
+          children: [
+            TextFormField(
+              controller: nameText,
+              decoration: InputDecoration(label: Text("Name")),
+              validator: (value) {
+                if (value.toString().length < 3) {
+                  return "Must be more than 3 characters";
+                }
+                if (value == null || value.isEmpty) {
+                  return "value must not be empty";
+                }
+              },
+            ),
+            SizedBox(
+              height: 30,
+            ),
+            TextFormField(
+                controller: descriptionText,
+                decoration: InputDecoration(label: Text("Description")),
+                validator: (value) {
+                  if (value.toString().length < 3) {
+                    return "Must be more than 3 characters";
+                  }
+                  if (value == null || value.isEmpty) {
+                    return "value must not be empty";
+                  }
+                }),
+            SizedBox(
+              height: 30,
+            ),
+            TextFormField(
+              controller: attributeText,
+              decoration: InputDecoration(label: Text("Main Attribute")),
+              validator: (value) {
+                if (value.toString().length < 3) {
+                  return "Must be more than 3 characters";
+                }
+                if (value == null || value.isEmpty) {
+                  return "value must not be empty";
+                }
+              },
+            ),
+            SizedBox(
+              height: 30,
+            ),
+            TextFormField(
+                controller: imageURLText,
+                decoration: InputDecoration(label: Text("Image URL")),
+                validator: (value) {
+                  if (value.toString().length < 3) {
+                    return "Must be more than 3 characters";
+                  }
+                  if (value == null || value.isEmpty) {
+                    return "value must not be empty";
+                  }
+                }),
+            SizedBox(
+              height: 30,
+            ),
+            Row(
+              children: [
+                Expanded(
+                    child: ElevatedButton(
+                        onPressed: () {
+                          if (addForm.currentState!.validate()) {
+                            addData();
+                            // Successful
+                          } else {
+                            print("Error");
+                          }
+                        },
+                        child: Text("Add Data"))),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
