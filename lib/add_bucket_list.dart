@@ -10,16 +10,19 @@ class AddBucketListScreen extends StatefulWidget {
 }
 
 class _AddBucketListScreenState extends State<AddBucketListScreen> {
+  TextEditingController nameText = TextEditingController();
+  TextEditingController descriptionText = TextEditingController();
+  TextEditingController attributeText = TextEditingController();
+  TextEditingController imageURLText = TextEditingController();
+
   Future<void> addData() async {
     try {
       Map<String, dynamic> data = {
         "completed": false,
-        "image_url":
-            "https://static.wikia.nocookie.net/dota2_gamepedia/images/9/9d/Mars_icon.png/revision/latest?cb=20190401094550",
-        "main_attribute": "Strength",
-        "name": "Mars",
-        "short_description":
-            "Mars is a durable melee hero who excels in team fights with his crowd control abilities and powerful spear-based attacks."
+        "image_url": imageURLText.text,
+        "main_attribute": attributeText.text,
+        "name": nameText.text,
+        "short_description": descriptionText.text
       };
       Response response = await Dio().patch(
           'https://flutter-firebase-project-4-default-rtdb.firebaseio.com/bucketlist/heroes/${widget.newIndex}.json',
@@ -36,7 +39,45 @@ class _AddBucketListScreenState extends State<AddBucketListScreen> {
       appBar: AppBar(
         title: Text("Add Bucket List"),
       ),
-      body: ElevatedButton(onPressed: addData, child: Text("Add Data")),
+      body: Column(
+        children: [
+          TextField(
+            controller: nameText,
+            decoration: InputDecoration(label: Text("Name")),
+          ),
+          SizedBox(
+            height: 30,
+          ),
+          TextField(
+            controller: descriptionText,
+            decoration: InputDecoration(label: Text("Description")),
+          ),
+          SizedBox(
+            height: 30,
+          ),
+          TextField(
+            controller: attributeText,
+            decoration: InputDecoration(label: Text("Main Attribute")),
+          ),
+          SizedBox(
+            height: 30,
+          ),
+          TextField(
+            controller: imageURLText,
+            decoration: InputDecoration(label: Text("Image URL")),
+          ),
+          SizedBox(
+            height: 30,
+          ),
+          Row(
+            children: [
+              Expanded(
+                  child: ElevatedButton(
+                      onPressed: addData, child: Text("Add Data"))),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
