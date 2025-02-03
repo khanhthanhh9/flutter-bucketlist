@@ -61,46 +61,53 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget listViewWidget() {
-    return ListView.builder(
-        itemCount: bucketListData.length,
-        itemBuilder: (BuildContext context, int index) {
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: (bucketListData[index] is Map &&
-                    (!bucketListData[index]["completed"]))
-                ? ListTile(
-                    onTap: () {
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (context) {
-                        return ViewItem(
-                            name: bucketListData[index]["name"] ?? "",
-                            main_attribute:
-                                bucketListData[index]["main_attribute"] ?? "",
-                            short_description: bucketListData[index]
-                                    ["short_description"] ??
-                                "",
-                            image_url: bucketListData[index]["image_url"] ?? "",
-                            index: index);
-                      })).then((value) {
-                        if (value == "refresh") {
-                          getData();
-                        }
-                      });
-                    },
-                    leading: CircleAvatar(
-                      radius: 25,
-                      backgroundImage: NetworkImage(
-                          bucketListData[index]["image_url"] ?? ""),
-                    ),
-                    title: Text(bucketListData[index]["name"] ?? "NO NAME"),
-                    trailing: Text(
-                      bucketListData[index]["main_attribute"] ?? "",
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  )
-                : SizedBox(),
-          );
-        });
+    List<dynamic> filterList = bucketListData
+        .where((element) => !(element?["completed"] ?? false))
+        .toList();
+    return filterList.length < 1
+        ? Center(child: Text("No Data Available"))
+        : ListView.builder(
+            itemCount: bucketListData.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: (bucketListData[index] is Map &&
+                        (!(bucketListData[index]?["completed"] ?? false)))
+                    ? ListTile(
+                        onTap: () {
+                          Navigator.push(context,
+                              MaterialPageRoute(builder: (context) {
+                            return ViewItem(
+                                name: bucketListData[index]["name"] ?? "",
+                                main_attribute: bucketListData[index]
+                                        ["main_attribute"] ??
+                                    "",
+                                short_description: bucketListData[index]
+                                        ["short_description"] ??
+                                    "",
+                                image_url:
+                                    bucketListData[index]["image_url"] ?? "",
+                                index: index);
+                          })).then((value) {
+                            if (value == "refresh") {
+                              getData();
+                            }
+                          });
+                        },
+                        leading: CircleAvatar(
+                          radius: 25,
+                          backgroundImage: NetworkImage(
+                              bucketListData[index]["image_url"] ?? ""),
+                        ),
+                        title: Text(bucketListData[index]["name"] ?? "NO NAME"),
+                        trailing: Text(
+                          bucketListData[index]["main_attribute"] ?? "",
+                          style: TextStyle(color: Colors.red),
+                        ),
+                      )
+                    : SizedBox(),
+              );
+            });
   }
 
   @override
