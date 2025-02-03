@@ -1,3 +1,5 @@
+import 'package:bucketlistapp/add_bucket_list.dart';
+import 'package:bucketlistapp/view_item.dart';
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 
@@ -12,6 +14,7 @@ class _MainScreenState extends State<MainScreen> {
   List<dynamic> bucketListData = [];
 
   bool isLoading = false;
+  bool isError = false;
   Future<void> getData() async {
     setState(() {
       isLoading = true;
@@ -21,22 +24,83 @@ class _MainScreenState extends State<MainScreen> {
           'https://flutter-firebase-project-4-default-rtdb.firebaseio.com/bucketlist.json');
 
       if (response.statusCode == 200) {
-        bucketListData = response.data["heroes"];
+        // bucketListData = response.data["heroes"];
+        // print(response.data);
+        if (response.data is Map) {
+          bucketListData = (response.data["heroes"] is List)
+              ? response.data["heroes"]
+              : [response.data['heroes']];
+        } else {
+          bucketListData = [];
+        }
+
         isLoading = false;
+        isError = false;
         setState(() {});
       }
     } catch (e) {
       isLoading = false;
-      showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: Text("Can't connect to the server"),
-            );
-          });
+      isError = true;
+      setState(() {});
     }
     // Show dialog for non-successful responses
     // Handle any exceptions that occur during the request
+  }
+
+  Widget errorWidget() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.warning),
+          Text("Error getting the data"),
+          ElevatedButton(onPressed: () {}, child: Text("Please try again"))
+        ],
+      ),
+    );
+  }
+
+  Widget listViewWidget() {
+    return ListView.builder(
+        itemCount: bucketListData.length,
+        itemBuilder: (BuildContext context, int index) {
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: (bucketListData[index] is Map &&
+                    (!bucketListData[index]["completed"]))
+                ? ListTile(
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return ViewItem(
+                            name: bucketListData[index]["name"] ?? "",
+                            main_attribute:
+                                bucketListData[index]["main_attribute"] ?? "",
+                            short_description: bucketListData[index]
+                                    ["short_description"] ??
+                                "",
+                            image_url: bucketListData[index]["image_url"] ?? "",
+                            index: index);
+                      })).then((value) {
+                        if (value == "refresh") {
+                          getData();
+                        }
+                      });
+                    },
+                    leading: CircleAvatar(
+                      radius: 25,
+                      backgroundImage: NetworkImage(
+                          bucketListData[index]["image_url"] ?? ""),
+                    ),
+                    title: Text(bucketListData[index]["name"] ?? "NO NAME"),
+                    trailing: Text(
+                      bucketListData[index]["main_attribute"] ?? "",
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  )
+                : SizedBox(),
+          );
+        });
   }
 
   @override
@@ -48,6 +112,15 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) {
+            return AddBucketListScreen();
+          }));
+        },
+        shape: CircleBorder(),
+        child: Icon(Icons.add),
+      ),
       appBar: AppBar(
         title: Text("Bucket List App"),
         actions: [
@@ -66,25 +139,9 @@ class _MainScreenState extends State<MainScreen> {
         },
         child: isLoading
             ? Center(child: CircularProgressIndicator())
-            : ListView.builder(
-                itemCount: bucketListData.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        radius: 25,
-                        backgroundImage: NetworkImage(
-                            bucketListData[index]["image_url"] ?? ""),
-                      ),
-                      title: Text(bucketListData[index]["name"] ?? "NO NAME"),
-                      trailing: Text(
-                        bucketListData[index]["main_attribute"] ?? "",
-                        style: TextStyle(color: Colors.red),
-                      ),
-                    ),
-                  );
-                }),
+            : isError
+                ? errorWidget()
+                : listViewWidget(),
       ),
     );
   }
